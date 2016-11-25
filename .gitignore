@@ -23,6 +23,10 @@
 *.a
 *.lib
 
+# VS debug files
+*.ilk
+*.pdb
+
 # Executables
 *.exe
 *.out
