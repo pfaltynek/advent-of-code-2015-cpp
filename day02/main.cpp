@@ -1,9 +1,11 @@
 #include <cstdio>
 #include <iostream>
+#include <stdlib.h>
+#include <string.h>
 
 int main(void) {
 	FILE* f;
-	char buff [101], *ptr;
+	char buff [101], *ptr, *pnum;
 	int result1 = 0, result2 = 0;
 	bool basement_entered = false;
 	int input_line = 0;
@@ -18,33 +20,40 @@ int main(void) {
 		return -1;
 	}
 
-	while (fgets(buff, 101, f) != EOF) {
-		int dims[3], idx = 0;
+	while (fgets(buff, 101, f) != NULL) {
+		int dims[3], idx = 0, tmp;
 		
+		input_line++;
 		ptr = buff;
-		
-		
-		switch (c) {
-			case '(':
-				result1++;
-				break;
-			case ')':
-				result1--;
-				break;
-			case '\n':
-			case '\r':
-				break;
-			default:
-				std::cout << "Invalid character in input file.\n";
-				return -1;
-				break;
-		}
-		if (!basement_entered) {
-			result2++;
-			if (result1 < 0) {
-				basement_entered = true;
+		while (idx < 3){
+			pnum = ptr;
+			while ((*pnum <= '9') && (*pnum >= '0')){
+				pnum++;
 			}
+			if ((*pnum == 'x') || (*pnum == 'X') || (*pnum == 0) || (*pnum == '\n') || (*pnum == '\r')){
+				*pnum = 0;
+				dims[idx] = atoi(ptr);
+				idx++;
+				ptr = ++pnum;
+			}
+			else{
+				std::cout << "Invalid input format at line " << input_line << std::endl;
+				return -1;
+			} 
 		}
+
+		if (dims[0] > dims[1]) {
+			tmp = dims[1];
+			dims[1] = dims[0];
+			dims[0] = tmp;
+		}
+		if (dims[1] > dims[2]) {
+			tmp = dims[2];
+			dims[2] = dims[1];
+			dims[1] = tmp;
+		}
+		result1 += (2 * (dims[0] * dims[1])) + (2 * (dims[0] * dims[2])) + (2 * (dims[1] * dims[2])) + (dims[0]*dims[1]);
+		result2 += (2 * dims[0]) + (2 * dims[1]) + (dims[0] * dims[1] * dims[2]);
 	}
 
 	if (f != NULL) {
