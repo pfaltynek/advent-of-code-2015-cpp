@@ -3,11 +3,12 @@
 
 int main(void) {
 	FILE* f;
-	int c;
+	char buff [101], *ptr;
 	int result1 = 0, result2 = 0;
 	bool basement_entered = false;
+	int input_line = 0;
 
-	std::cout << "=== Advent of Code - day 1 ====" << std::endl;
+	std::cout << "=== Advent of Code - day 2 ====" << std::endl;
 
 	std::cout << "--- part 1 ---" << std::endl;
 
@@ -17,8 +18,12 @@ int main(void) {
 		return -1;
 	}
 
-	c = fgetc(f);
-	while (c != EOF) {
+	while (fgets(buff, 101, f) != EOF) {
+		int dims[3], idx = 0;
+		
+		ptr = buff;
+		
+		
 		switch (c) {
 			case '(':
 				result1++;
@@ -40,7 +45,6 @@ int main(void) {
 				basement_entered = true;
 			}
 		}
-		c = fgetc(f);
 	}
 
 	if (f != NULL) {
