@@ -1,14 +1,15 @@
 #include <cstdio>
 #include <iostream>
 #include <map>
-#include <stdlib.h>
-#include <string.h>
 
-std::map<long, int> part1, part2;
+//std::map<long, int> part1, part2;
+std::map<long long, int> part1, part2;
 
 void DeliverPresent(int x, int y, bool ispart1) {
-	std::map<long, int>::iterator it1;
-	long pos, tmp;
+	//std::map<long, int>::iterator it1;
+	std::map<long long, int>::iterator it1;
+	//long pos, tmp;
+	long long pos, tmp;
 
 	pos = x;
 	pos &= 0x00000000FFFFFFFF;
@@ -43,7 +44,12 @@ int main(void) {
 
 	std::cout << "=== Advent of Code - day 3 ====" << std::endl;
 	std::cout << "--- part 1 ---" << std::endl;
-
+/*
+	std::cout << "Size of short is:" << sizeof(short) << std::endl;
+	std::cout << "Size of int is:" << sizeof(int) << std::endl;
+	std::cout << "Size of long is:" << sizeof(long) << std::endl;
+	std::cout << "Size of long long is:" << sizeof(long long) << std::endl;
+*/
 	f = fopen("input.txt", "r");
 	if (f == NULL) {
 		std::cout << "Error opening input file.\n";
@@ -68,11 +74,10 @@ int main(void) {
 			case 'v':
 				y1++;
 				DeliverPresent(x1, y1, true);
-				if (isSanta){
+				if (isSanta) {
 					y2++;
 					DeliverPresent(x2, y2, false);
-				}
-				else{
+				} else {
 					y3++;
 					DeliverPresent(x3, y3, false);
 				}
@@ -80,11 +85,10 @@ int main(void) {
 			case '^':
 				y1--;
 				DeliverPresent(x1, y1, true);
-				if (isSanta){
+				if (isSanta) {
 					y2--;
 					DeliverPresent(x2, y2, false);
-				}
-				else{
+				} else {
 					y3--;
 					DeliverPresent(x3, y3, false);
 				}
@@ -92,11 +96,10 @@ int main(void) {
 			case '>':
 				x1++;
 				DeliverPresent(x1, y1, true);
-				if (isSanta){
+				if (isSanta) {
 					x2++;
 					DeliverPresent(x2, y2, false);
-				}
-				else{
+				} else {
 					x3++;
 					DeliverPresent(x3, y3, false);
 				}
@@ -104,11 +107,10 @@ int main(void) {
 			case '<':
 				x1--;
 				DeliverPresent(x1, y1, true);
-				if (isSanta){
+				if (isSanta) {
 					x2--;
 					DeliverPresent(x2, y2, false);
-				}
-				else{
+				} else {
 					x3--;
 					DeliverPresent(x3, y3, false);
 				}

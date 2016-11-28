@@ -1,0 +1,5 @@
+Win7
+	Size of short is:		2
+	Size of int is:			4
+	Size of long is:		4
+	Size of long long is:		8
