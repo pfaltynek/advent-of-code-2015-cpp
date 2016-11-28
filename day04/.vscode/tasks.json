@@ -7,7 +7,7 @@
 	},
 	"linux":{
 		"command": "g++",
-		"args": ["-g", "main.cpp"]
+		"args": ["-g", "main.cpp", "-lcrypto"]
 	},
 	"isShellCommand": true,
 	"showOutput": "always"
