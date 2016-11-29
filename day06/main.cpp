@@ -4,13 +4,19 @@
 #include <iostream>
 #include <string>
 
+const std::string turn_on = "turn on ";
+const std::string turn_off = "turn off ";
+const std::string toggle = "toggle ";
+const std::string through = " through ";
+
 int main(void) {
-	int result1 = 0, result2 = 0, len;
+	int result1 = 0, result2 = 0, cnt;
 	std::ifstream input;
 	std::string line;
-	std::string vowels = "aeiou";
+	unsigned char grid1[1000][1000];
+	int grid2[1000][1000];
 
-	std::cout << "=== Advent of Code - day 5 ====" << std::endl;
+	std::cout << "=== Advent of Code - day 6 ====" << std::endl;
 	std::cout << "--- part 1 ---" << std::endl;
 
 	input.open("input.txt", std::ifstream::in);
@@ -20,48 +26,39 @@ int main(void) {
 		return -1;
 	}
 
-	while (std::getline(input, line)) {
-		int vowels_cnt = 0;
-		bool char_pair = false;
-		int prev_char = -1;
-		bool two_pairs = false;
-		bool symetric_pair = false;
+	memset(grid1, sizeof(grid1), 0);
+	memset(grid2, sizeof(grid2), 0);
 
-		// part1 checks:
-		// if string does not contain any of the dirty substrings
-		if ((line.find("ab") == std::string::npos) &&
-			(line.find("cd") == std::string::npos) &&
-			(line.find("pq") == std::string::npos) &&
-			(line.find("xy") == std::string::npos)) {
-			len = line.size();
-			for (int i = 0; i < len; i++) {
-				// check for character appearing twice in a row
-				if (line[i] == prev_char) {
-					char_pair = true;
-				}
-				prev_char = line[i];
-				// check if contains three vowels
-				if (vowels.find_first_of(line[i]) != std::string::npos) {
-					vowels_cnt++;
-				}
-			}
-			if ((vowels_cnt >= 3) && char_pair) {
-				result1++;
-			}
+	cnt = 0;
+
+	while (std::getline(input, line)) {
+		int x1, y1, x2, y2, cmd, pos;
+		std::string coord1, coord2;
+
+		cnt++;
+		// instruction parse
+		if (line.find(turn_on) == 0) {
+			cmd = 1;
+			line = line.substr(turn_on.size());
+		} else if (line.find(turn_off) == 0) {
+			cmd = -1;
+			line = line.substr(turn_off.size());
+		} else if (line.find(toggle) == 0) {
+			cmd = 0;
+			line = line.substr(toggle.size());
+		} else {
+			std::cout << "Unknown instruction type at input line " << cnt
+					  << std::endl;
+			return -1;
 		}
-		// part2 checks:
-		for (int i = 0; i < (len - 2); i++) {
-			// non overlaping twice appearation of letter pair
-			if (line.find(line.substr(i, 2),i+2)!= std::string::npos){
-				two_pairs = true;
-			}
-			// letter repeating with exactly one letter between them
-			if (line[i] == line[i+2]) {
-				symetric_pair = true;
-			}
-		}
-		if (symetric_pair && two_pairs) {
-			result2++;
+		pos = line.find(through);
+		if (pos != std::string::npos) {
+			coord1 = line.substr(0, pos);
+			coord2 = line.substr(pos + through.size());
+		} else {
+			std::cout << "Unable to find coordinates at input line " << cnt
+					  << std::endl;
+			return -1;
 		}
 	}
 
