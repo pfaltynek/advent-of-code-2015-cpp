@@ -2,6 +2,7 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
+#include <string>
 
 int main(void) {
 	int result1 = 0, result2 = 0, len;
@@ -14,7 +15,7 @@ int main(void) {
 
 	input.open("input.txt", std::ifstream::in);
 
-	if (!input.is_open()) {
+	if (input.fail()) {
 		std::cout << "Error opening input file.\n";
 		return -1;
 	}
@@ -23,6 +24,8 @@ int main(void) {
 		int vowels_cnt = 0;
 		bool char_pair = false;
 		int prev_char = -1;
+		bool two_pairs = false;
+		bool symetric_pair = false;
 
 		// part1 checks:
 		// if string does not contain any of the dirty substrings
@@ -46,7 +49,20 @@ int main(void) {
 				result1++;
 			}
 		}
-		// part2 check
+		// part2 checks:
+		for (int i = 0; i < (len - 2); i++) {
+			// non overlaping twice appearation of letter pair
+			if (line.find(line.substr(i, 2),i+2)!= std::string::npos){
+				two_pairs = true;
+			}
+			// letter repeating with exactly one letter between them
+			if (line[i] == line[i+2]) {
+				symetric_pair = true;
+			}
+		}
+		if (symetric_pair && two_pairs) {
+			result2++;
+		}
 	}
 
 	if (input.is_open()) {
@@ -56,34 +72,4 @@ int main(void) {
 	std::cout << "Result is " << result1 << std::endl;
 	std::cout << "--- part 2 ---" << std::endl;
 	std::cout << "Result is " << result2 << std::endl;
-
-	/*	FILE *f;
-		char line[101];
-		int result1 = 0, result2 = 0;
-		int len;
-
-		std::cout << "=== Advent of Code - day 5 ====" << std::endl;
-		std::cout << "--- part 1 ---" << std::endl;
-
-		f = fopen("input.txt", "r");
-		if (f == NULL) {
-			std::cout << "Error opening input file.\n";
-			return -1;
-		}
-
-		while (fgets(line, 101, f) != NULL) {
-			len = strlen(line);
-			// check if contains no allowed strings "ab", "cd", "pq" or "xy"
-			if ()
-		}
-
-		if (f != NULL) {
-			fclose(f);
-			f = NULL;
-		}
-
-		std::cout << "Result is " << result1 << std::endl;
-		std::cout << "--- part 2 ---" << std::endl;
-		std::cout << "Result is " << result2 << std::endl;
-		*/
 }
