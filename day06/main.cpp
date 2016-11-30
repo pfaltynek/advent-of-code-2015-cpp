@@ -9,12 +9,36 @@ const std::string turn_off = "turn off ";
 const std::string toggle = "toggle ";
 const std::string through = " through ";
 
+unsigned char grid1[1000][1000];
+int grid2[1000][1000];
+
+bool DecodeCoords(std::string coords, int &x, int &y) {
+	std::string tmp;
+	int pos;
+
+	pos = coords.find(',');
+	if (pos != std::string::npos) {
+		tmp = coords.substr(0, pos);
+		if (!tmp.size()) {
+			return false;
+		}
+		x = atoi(tmp.c_str());
+
+		tmp = coords.substr(pos + 1);
+		if (!tmp.size()) {
+			return false;
+		}
+		y = atoi(tmp.c_str());
+	} else {
+		return false;
+	}
+	return true;
+}
+
 int main(void) {
 	int result1 = 0, result2 = 0, cnt;
 	std::ifstream input;
 	std::string line;
-	unsigned char grid1[1000][1000];
-	int grid2[1000][1000];
 
 	std::cout << "=== Advent of Code - day 6 ====" << std::endl;
 	std::cout << "--- part 1 ---" << std::endl;
@@ -51,19 +75,80 @@ int main(void) {
 					  << std::endl;
 			return -1;
 		}
+		// coords parse
 		pos = line.find(through);
 		if (pos != std::string::npos) {
 			coord1 = line.substr(0, pos);
 			coord2 = line.substr(pos + through.size());
+			if (!DecodeCoords(coord1, x1, y1)) {
+				std::cout
+					<< "Unable to find decode start coordinates at input line "
+					<< cnt << std::endl;
+				return -1;
+			}
+			if (!DecodeCoords(coord2, x2, y2)) {
+				std::cout
+					<< "Unable to find decode end coordinates at input line "
+					<< cnt << std::endl;
+				return -1;
+			}
+			if ((x1 < 0) || (x1 > 999) || (y1 < 0) || (y1 > 999) || (x2 < 0) ||
+				(x2 > 999) || (y2 < 0) || (y2 > 999)) {
+				std::cout << "Invalid coordinates at input line " << cnt
+						  << std::endl;
+				return -1;
+			}
 		} else {
 			std::cout << "Unable to find coordinates at input line " << cnt
 					  << std::endl;
 			return -1;
 		}
+		// instruction processing
+		switch (cmd) {
+			case -1: // turn off
+				for (int x = x1; x <= x2; x++) {
+					for (int y = y1; y <= y2; y++) {
+						// part1
+						grid1[x][y] = 0;
+						// part2
+						if (grid2[x][y] > 0) {
+							grid2[x][y]--;
+						}
+					}
+				}
+				break;
+			case 0: // toggle
+				for (int x = x1; x <= x2; x++) {
+					for (int y = y1; y <= y2; y++) {
+						// part1
+						grid1[x][y] ^= 1;
+						// part2
+						grid2[x][y] += 2;
+					}
+				}
+				break;
+			case 1: // turn on
+				for (int x = x1; x <= x2; x++) {
+					for (int y = y1; y <= y2; y++) {
+						// part1
+						grid1[x][y] = 1;
+						// part2
+						grid2[x][y]++;
+					}
+				}
+				break;
+		}
 	}
 
 	if (input.is_open()) {
 		input.close();
+	}
+
+	for (size_t i = 0; i < 1000; i++) {
+		for (size_t j = 0; j < 1000; j++) {
+			result1 += grid1[i][j];
+			result2 += grid2[i][j];
+		}
 	}
 
 	std::cout << "Result is " << result1 << std::endl;
