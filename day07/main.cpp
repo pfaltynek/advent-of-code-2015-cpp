@@ -2,6 +2,7 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
+#include <map>
 #include <string>
 
 const std::string sides_divider = " -> ";
@@ -19,7 +20,7 @@ typedef enum OPERATION {
 	OP_LSHIFT,
 	OP_RSHIFT
 } OPERATION;
-
+/*
 class INSTRUCTION {
   public:
 	std::string out;
@@ -39,13 +40,25 @@ INSTRUCTION::INSTRUCTION() {
 	in1 = "";
 	in2 = "";
 }
+*/
+
+typedef struct {
+	std::string out;
+	std::string in1;
+	std::string in2;
+	unsigned int inval1;
+	unsigned int inval2;
+	OPERATION operation;
+} INSTRUCTION;
 
 bool IsNumeric(std::string expression) {
 	return expression.find_first_not_of("0123456789") != std::string::npos;
 }
 
+std::map<std::string, INSTRUCTION> instructions;
+
 int main(void) {
-	int result1 = 0, result2 = 0, cnt;
+	int result1 = 0, result2 = 0, cnt, pos;
 	std::ifstream input;
 	std::string line;
 
@@ -62,8 +75,22 @@ int main(void) {
 	cnt = 0;
 
 	while (std::getline(input, line)) {
-
 		cnt++;
+		INSTRUCTION inst;
+		std::string tmp1, tmp2;
+
+		// decode instruction sides
+		pos = line.find(sides_divider);
+		if (pos == std::string::npos) {
+			std::cout << "Instruction invalid format at input line " << cnt
+					  << std::endl;
+			return -1;
+		}
+		// parse instruction type
+		tmp1 = line.substr(0, pos);
+		inst.out = line.substr(pos + sides_divider.size());
+		pos = tmp1.find(op_and);
+
 	}
 
 	if (input.is_open()) {
