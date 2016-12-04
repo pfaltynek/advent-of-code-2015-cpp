@@ -34,36 +34,62 @@ bool IsNumeric(std::string expression) {
 	return expression.find_first_not_of("0123456789") == std::string::npos;
 }
 
-int ProcessInstructions(std::map<std::string, INSTRUCTION> data, std::string request) {
+bool ProcessInstruction(INSTRUCTION ins, std::map<std::string, int> &values) {
+	bool result = false;
+
+	switch (ins.operation) {
+		case OP_AND:
+			if (!ins.in1.empty()){
+				if (values.find(ins.in1))
+			}
+
+			break;
+		case OP_OR:
+
+			break;
+		case OP_NOT:
+
+			break;
+		case OP_LSHIFT:
+
+			break;
+		case OP_RSHIFT:
+
+			break;
+		case OP_ASSIGN:
+
+			break;
+	}
+
+	return result;
+}
+
+int ProcessInstructions(std::map<std::string, INSTRUCTION> data,
+						std::string request) {
 	std::map<std::string, int> values;
-	//std::map<std::string, INSTRUCTION> instructions(data);
 	std::map<std::string, INSTRUCTION> ins;
 	std::vector<std::string> index;
 	std::map<std::string, INSTRUCTION>::iterator it;
 
+	index.clear();
 	index.push_back(request);
+	values.clear();
+	ins.clear();
 
-	while (index.size() > 0) {
-		std::string search_for = index[0];
-		it = data.find(search_for);
-		if (it == data.end()) {
-			int z = 999; // problem
-		}
-		else {
-
+	while ((index.size() > 0) || (ins.size() > 0)) {
+		if (index.size() > 0) {
+			std::string search_for = index[0];
+			it = data.find(search_for);
+			if (it == data.end()) {
+				int z = 999; // problem
+			} else {
+				if (!ProcessInstruction(it->second, values)) {
+					ins[index[0]] = it->second;
+				}
+			}
 		}
 	}
 
-	/*
-		for (std::map<std::string, INSTRUCTION>::iterator it =
-	   instructions.begin();
-			 it != instructions.end(); ++it) {
-			if ((it->second.operation == OPERATION::OP_ASSIGN) &&
-	   (it->second.in1.empty())){
-				int x = 9;
-			}
-		}
-	*/
 	return 0;
 }
 
