@@ -36,32 +36,64 @@ bool IsNumeric(std::string expression) {
 
 bool ProcessInstruction(INSTRUCTION ins, std::map<std::string, int> &values) {
 	bool result = false;
+	int value1, value2;
 
 	switch (ins.operation) {
 		case OP_AND:
-			if (!ins.in1.empty()){
-				if (values.find(ins.in1))
+		case OP_OR:
+		case OP_LSHIFT:
+		case OP_RSHIFT:
+			if (!ins.in2.empty()) {
+				if (values.find(ins.in2) == values.end()) {
+					return false;
+				} else {
+					value2 = values[ins.in2];
+				}
+			} else {
+				value2 = ins.in2val;
 			}
 
-			break;
-		case OP_OR:
-
-			break;
 		case OP_NOT:
-
-			break;
-		case OP_LSHIFT:
-
-			break;
-		case OP_RSHIFT:
-
-			break;
 		case OP_ASSIGN:
-
+			if (!ins.in1.empty()) {
+				if (values.find(ins.in1) == values.end()) {
+					return false;
+				} else {
+					value1 = values[ins.in1];
+				}
+			} else {
+				value1 = ins.in1val;
+			}
 			break;
 	}
 
-	return result;
+	switch (ins.operation) {
+		case OP_AND:
+			values[ins.out] = value1 & value2;
+			break;
+
+		case OP_OR:
+			values[ins.out] = value1 | value2;
+			break;
+
+		case OP_LSHIFT:
+			values[ins.out] = value1 << value2;
+			break;
+
+		case OP_RSHIFT:
+			values[ins.out] = value1 >> value2;
+			break;
+
+		case OP_ASSIGN:
+			values[ins.out] = value1;
+			break;
+
+		case OP_NOT:
+			values[ins.out] = ~value1;
+			break;
+	}
+
+	return true;
 }
 
 int ProcessInstructions(std::map<std::string, INSTRUCTION> data,
@@ -76,21 +108,33 @@ int ProcessInstructions(std::map<std::string, INSTRUCTION> data,
 	values.clear();
 	ins.clear();
 
-	while ((index.size() > 0) || (ins.size() > 0)) {
-		if (index.size() > 0) {
-			std::string search_for = index[0];
-			it = data.find(search_for);
+	// while ((index.size() > 0) || (ins.size() > 0)) {
+	while (values.find(request) == values.end()) {
+		if (!index.empty()) {
+			std::string variable;
+			variable = index.pop_back();
+			it = data.find(variable);
 			if (it == data.end()) {
 				int z = 999; // problem
 			} else {
 				if (!ProcessInstruction(it->second, values)) {
-					ins[index[0]] = it->second;
+					ins[variable] = it->second;
+					if (!it->second.in1.empty()) {
+						index.push_back(it->second.in1);
+					}
+					if (!it->second.in2.empty()) {
+						index.push_back(it->second.in2);
+					}
+				}
+				else{
+					
 				}
 			}
 		}
 	}
+}
 
-	return 0;
+return values[request];
 }
 
 int main(void) {
@@ -128,6 +172,8 @@ int main(void) {
 		inst.out = line.substr(pos + sides_divider.size());
 		inst.in1val = 0;
 		inst.in2val = 0;
+		inst.in1.clear();
+		inst.in2.clear();
 		pos = left.find(op_and);
 		if (pos != std::string::npos) {
 			inst.operation = OPERATION::OP_AND;
