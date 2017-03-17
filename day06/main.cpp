@@ -2,6 +2,7 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
+#include <regex>
 #include <string>
 
 const std::string turn_on = "turn on ";
@@ -11,6 +12,30 @@ const std::string through = " through ";
 
 unsigned char grid1[1000][1000];
 int grid2[1000][1000];
+
+bool DecodeInstruction(std::string line, int &cmd, int &x1, int &y1, int &x2, int &y2) {
+	std::regex regex_toggle("^toggle (\\d+),(\\d+) through (\\d+),(\\d+)$");
+	std::regex regex_turn_off("^turn off (\\d+),(\\d+) through (\\d+),(\\d+)$");
+	std::regex regex_turn_on("^turn on (\\d+),(\\d+) through (\\d+),(\\d+)$");
+	std::smatch sm;
+
+	if (regex_match(line, sm, regex_toggle)) {
+		cmd = 0;
+	} else if (regex_match(line, sm, regex_turn_on)) {
+		cmd = 1;
+	} else if (regex_match(line, sm, regex_turn_off)) {
+		cmd = -1;
+	} else {
+		return false;
+	}
+
+	x1 = atoi(sm.str(1).c_str());
+	y1 = atoi(sm.str(2).c_str());
+	x2 = atoi(sm.str(3).c_str());
+	y2 = atoi(sm.str(4).c_str());
+
+	return true;
+}
 
 bool DecodeCoords(std::string coords, int &x, int &y) {
 	std::string tmp;
