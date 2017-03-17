@@ -1,14 +1,13 @@
 #include <cstdio>
 #include <iostream>
+#include <fstream>
+#include <string>
 #include <map>
 
-//std::map<long, int> part1, part2;
 std::map<long long, int> part1, part2;
 
 void DeliverPresent(int x, int y, bool ispart1) {
-	//std::map<long, int>::iterator it1;
 	std::map<long long, int>::iterator it1;
-	//long pos, tmp;
 	long long pos, tmp;
 
 	pos = x;
@@ -36,22 +35,17 @@ void DeliverPresent(int x, int y, bool ispart1) {
 }
 
 int main(void) {
-	FILE *f;
-	int c;
+	std::ifstream input;
+	std::string line, data;
 	int result1 = 0, result2 = 0;
 	int x1, y1, x2, y2, x3, y3;
 	bool isSanta = true;
 
 	std::cout << "=== Advent of Code - day 3 ====" << std::endl;
 	std::cout << "--- part 1 ---" << std::endl;
-/*
-	std::cout << "Size of short is:" << sizeof(short) << std::endl;
-	std::cout << "Size of int is:" << sizeof(int) << std::endl;
-	std::cout << "Size of long is:" << sizeof(long) << std::endl;
-	std::cout << "Size of long long is:" << sizeof(long long) << std::endl;
-*/
-	f = fopen("input.txt", "r");
-	if (f == NULL) {
+
+	input.open("input.txt", std::ifstream::in);
+	if (input.fail()) {
 		std::cout << "Error opening input file.\n";
 		return -1;
 	}
@@ -67,10 +61,13 @@ int main(void) {
 	DeliverPresent(x1, y1, true);
 	DeliverPresent(x2, y2, false);
 	DeliverPresent(x3, y3, false);
+	data.clear();
 
-	c = fgetc(f);
-	while (c != EOF) {
-		switch (c) {
+	while (std::getline(input, line)) {
+		data += line;
+	}
+	for (std::string::iterator it = data.begin(); it != data.end(); ++it) {
+		switch (*it) {
 			case 'v':
 				y1++;
 				DeliverPresent(x1, y1, true);
@@ -120,13 +117,11 @@ int main(void) {
 			case '\n':
 				break;
 		}
-		c = fgetc(f);
 		isSanta = !isSanta;
 	}
 
-	if (f != NULL) {
-		fclose(f);
-		f = NULL;
+	if (input.is_open()) {
+		input.close();
 	}
 
 	result1 = part1.size();
