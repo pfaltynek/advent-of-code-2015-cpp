@@ -85,49 +85,17 @@ int main(void) {
 		std::string coord1, coord2;
 
 		cnt++;
-		// instruction parse
-		if (line.find(turn_on) == 0) {
-			cmd = 1;
-			line = line.substr(turn_on.size());
-		} else if (line.find(turn_off) == 0) {
-			cmd = -1;
-			line = line.substr(turn_off.size());
-		} else if (line.find(toggle) == 0) {
-			cmd = 0;
-			line = line.substr(toggle.size());
-		} else {
-			std::cout << "Unknown instruction type at input line " << cnt
-					  << std::endl;
+
+		if (!DecodeInstruction(line, cmd, x1, y1, x2, y2)) {
+			std::cout << "Unknown instruction type at input line " << cnt << std::endl;
 			return -1;
 		}
-		// coords parse
-		pos = line.find(through);
-		if (pos != std::string::npos) {
-			coord1 = line.substr(0, pos);
-			coord2 = line.substr(pos + through.size());
-			if (!DecodeCoords(coord1, x1, y1)) {
-				std::cout
-					<< "Unable to find decode start coordinates at input line "
-					<< cnt << std::endl;
-				return -1;
-			}
-			if (!DecodeCoords(coord2, x2, y2)) {
-				std::cout
-					<< "Unable to find decode end coordinates at input line "
-					<< cnt << std::endl;
-				return -1;
-			}
-			if ((x1 < 0) || (x1 > 999) || (y1 < 0) || (y1 > 999) || (x2 < 0) ||
-				(x2 > 999) || (y2 < 0) || (y2 > 999)) {
-				std::cout << "Invalid coordinates at input line " << cnt
-						  << std::endl;
-				return -1;
-			}
-		} else {
-			std::cout << "Unable to find coordinates at input line " << cnt
-					  << std::endl;
+
+		if ((x1 < 0) || (x1 > 999) || (y1 < 0) || (y1 > 999) || (x2 < 0) || (x2 > 999) || (y2 < 0) || (y2 > 999)) {
+			std::cout << "Invalid coordinates at input line " << cnt << std::endl;
 			return -1;
 		}
+
 		// instruction processing
 		switch (cmd) {
 			case -1: // turn off
