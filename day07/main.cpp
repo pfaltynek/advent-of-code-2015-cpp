@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <regex>
 #include <string>
 #include <vector>
 
@@ -32,6 +33,96 @@ typedef struct {
 
 bool IsNumeric(std::string expression) {
 	return expression.find_first_not_of("0123456789") == std::string::npos;
+}
+
+bool DecodeInstruction(std::string line, INSTRUCTION &inst) {
+	std::regex regex_instruction_and("^([a-z]+|\\d+) AND ([a-z]+|\\d+) -> ([a-z]+)$");
+	std::regex regex_instruction_or("^([a-z]+|\\d+) OR ([a-z]+|\\d+) -> ([a-z]+)$");
+	std::regex regex_instruction_lshift("^([a-z]+|\\d+) LSHIFT (\\d+) -> ([a-z]+)$");
+	std::regex regex_instruction_rshift("^([a-z]+|\\d+) RSHIFT (\\d+) -> ([a-z]+)$");
+	std::regex regex_instruction_not("^NOT ([a-z]+|\\d+) -> ([a-z]+)$");
+	std::regex regex_instruction_assign("^([a-z]+|\\d+) -> ([a-z]+)$");
+	std::smatch sm;
+
+	inst.in1.clear();
+	inst.in2.clear();
+	inst.out.clear();
+	inst.in1val = 0;
+	inst.in2val = 0;
+
+	if (std::regex_match(line, sm, regex_instruction_and)) {
+		inst.operation = OPERATION::OP_AND;
+		inst.in1 = sm.str(1);
+		inst.in2 = sm.str(2);
+		inst.out = sm.str(3);
+		if (IsNumeric(inst.in1)) {
+			inst.in1val = atoi(inst.in1.c_str());
+			inst.in1.clear();
+		}
+		if (IsNumeric(inst.in2)) {
+			inst.in2val = atoi(inst.in2.c_str());
+			inst.in2.clear();
+		}
+	} else if (std::regex_match(line, sm, regex_instruction_or)) {
+		inst.operation = OPERATION::OP_OR;
+		inst.in1 = sm.str(1);
+		inst.in2 = sm.str(2);
+		inst.out = sm.str(3);
+		if (IsNumeric(inst.in1)) {
+			inst.in1val = atoi(inst.in1.c_str());
+			inst.in1.clear();
+		}
+		if (IsNumeric(inst.in2)) {
+			inst.in2val = atoi(inst.in2.c_str());
+			inst.in2.clear();
+		}
+	} else if (std::regex_match(line, sm, regex_instruction_rshift)) {
+		inst.operation = OPERATION::OP_RSHIFT;
+		inst.in1 = sm.str(1);
+		inst.in2 = sm.str(2);
+		inst.out = sm.str(3);
+		if (IsNumeric(inst.in1)) {
+			inst.in1val = atoi(inst.in1.c_str());
+			inst.in1.clear();
+		}
+		if (IsNumeric(inst.in2)) {
+			inst.in2val = atoi(inst.in2.c_str());
+			inst.in2.clear();
+		}
+	} else if (std::regex_match(line, sm, regex_instruction_lshift)) {
+		inst.operation = OPERATION::OP_LSHIFT;
+		inst.in1 = sm.str(1);
+		inst.in2 = sm.str(2);
+		inst.out = sm.str(3);
+		if (IsNumeric(inst.in1)) {
+			inst.in1val = atoi(inst.in1.c_str());
+			inst.in1.clear();
+		}
+		if (IsNumeric(inst.in2)) {
+			inst.in2val = atoi(inst.in2.c_str());
+			inst.in2.clear();
+		}
+	} else if (std::regex_match(line, sm, regex_instruction_not)) {
+		inst.operation = OPERATION::OP_NOT;
+		inst.in1 = sm.str(1);
+		inst.out = sm.str(2);
+		if (IsNumeric(inst.in1)) {
+			inst.in1val = atoi(inst.in1.c_str());
+			inst.in1.clear();
+		}
+	} else if (std::regex_match(line, sm, regex_instruction_assign)) {
+		inst.operation = OPERATION::OP_ASSIGN;
+		inst.in1 = sm.str(1);
+		inst.out = sm.str(2);
+		if (IsNumeric(inst.in1)) {
+			inst.in1val = atoi(inst.in1.c_str());
+			inst.in1.clear();
+		}
+	} else {
+		return false;
+	}
+
+	return true;
 }
 
 bool ProcessInstruction(INSTRUCTION ins, std::map<std::string, int> &values) {
@@ -96,8 +187,7 @@ bool ProcessInstruction(INSTRUCTION ins, std::map<std::string, int> &values) {
 	return true;
 }
 
-int ProcessInstructions(std::map<std::string, INSTRUCTION> data,
-						std::string request) {
+int ProcessInstructions(std::map<std::string, INSTRUCTION> data, std::string request) {
 	std::map<std::string, int> values;
 	std::map<std::string, INSTRUCTION> ins;
 	std::vector<std::string> index;
@@ -112,7 +202,8 @@ int ProcessInstructions(std::map<std::string, INSTRUCTION> data,
 	while (values.find(request) == values.end()) {
 		if (!index.empty()) {
 			std::string variable;
-			variable = index.pop_back();
+			variable = index.back();
+			index.pop_back();
 			it = data.find(variable);
 			if (it == data.end()) {
 				int z = 999; // problem
@@ -125,16 +216,14 @@ int ProcessInstructions(std::map<std::string, INSTRUCTION> data,
 					if (!it->second.in2.empty()) {
 						index.push_back(it->second.in2);
 					}
-				}
-				else{
-					
+				} else {
 				}
 			}
 		}
 	}
-}
+	//}
 
-return values[request];
+	return values[request];
 }
 
 int main(void) {
@@ -168,6 +257,11 @@ int main(void) {
 			return -1;
 		}
 		// parse instruction type
+		if (!DecodeInstruction(line, inst)) {
+			std::cout << "Instruction invalid format at input line " << cnt << std::endl;
+			return -1;
+		}
+		/*
 		left = line.substr(0, pos);
 		inst.out = line.substr(pos + sides_divider.size());
 		inst.in1val = 0;
@@ -189,7 +283,7 @@ int main(void) {
 			}
 		} else {
 			pos = left.find(op_or);
-			if (pos != std::string::npos) {
+			if (pos != s td::string::npos) {
 				inst.operation = OPERATION::OP_OR;
 				inst.in1 = left.substr(0, pos);
 				inst.in2 = left.substr(pos + op_or.size());
@@ -276,7 +370,7 @@ int main(void) {
 					}
 				}
 			}
-		}
+		}*/
 		instructions[inst.out] = inst;
 	}
 
