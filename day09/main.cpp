@@ -2,10 +2,9 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
+#include <map>
 #include <regex>
 #include <string>
-
-
 
 bool IsValidRouteInfo(std::string line, std::string &from, std::string &to, int &distance) {
 	std::regex regex_route("^(\\w+) to (\\w+) = (\\d+)$");
@@ -20,10 +19,27 @@ bool IsValidRouteInfo(std::string line, std::string &from, std::string &to, int 
 	return false;
 }
 
+void ExploreRoutes(std::map<std::map<std::string, int>>, std::vector<string>, int current_route, int &result1, int &result2) {
+	if (sites.size()) {
+		std::vector<std::string> new_sites(sites);
+
+	} else {
+		if (current_route < result1) {
+			result1 = current_route;
+		}
+		if (current_route > result2) {
+			result2 = current_route;
+		}
+	}
+	std::vector<std::string> new_sites;
+}
+
 int main(void) {
 	int result1 = 0, result2 = 0, cnt;
 	std::ifstream input;
 	std::string line;
+	std::map<std::string, std::map<std::string, int>> map;
+	std::vector<std::string> sites;
 
 	std::cout << "=== Advent of Code - day 8 ====" << std::endl;
 	std::cout << "--- part 1 ---" << std::endl;
@@ -46,7 +62,14 @@ int main(void) {
 			std::cout << "Instruction invalid format at input line " << cnt << std::endl;
 			return -1;
 		}
-
+		map[from][to] = distance;
+		map[to][from] = distance;
+		if (std::find(sites.begin(), sites.end(), from) == sites.end()) {
+			sites.push_back(from);
+		}
+		if (std::find(sites.begin(), sites.end(), to) == sites.end()) {
+			sites.push_back(to);
+		}
 	}
 
 	if (input.is_open()) {
