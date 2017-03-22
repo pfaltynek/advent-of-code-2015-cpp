@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cstring>
 #include <fstream>
 #include <iostream>
@@ -5,13 +6,6 @@
 #include <regex>
 #include <string>
 #include <vector>
-
-const std::string sides_divider = " -> ";
-const std::string op_and = " AND ";
-const std::string op_or = " OR ";
-const std::string op_not = "NOT ";
-const std::string op_lshift = " LSHIFT ";
-const std::string op_rshift = " RSHIFT ";
 
 typedef enum OPERATION {
 	OP_ASSIGN,
@@ -125,8 +119,8 @@ bool DecodeInstruction(std::string line, INSTRUCTION &inst) {
 	return true;
 }
 
-bool ProcessInstruction(INSTRUCTION ins, std::map<std::string, int> &values) {
-	bool result = false;
+bool ProcessInstruction(INSTRUCTION ins, std::map<std::string, int> &values, std::vector<std::string> &values2search) {
+	bool result = true;
 	int value1, value2;
 
 	switch (ins.operation) {
@@ -136,7 +130,10 @@ bool ProcessInstruction(INSTRUCTION ins, std::map<std::string, int> &values) {
 		case OP_RSHIFT:
 			if (!ins.in2.empty()) {
 				if (values.find(ins.in2) == values.end()) {
-					return false;
+					if (std::find(values2search.begin(), values2search.end(), ins.in2) == values2search.end()) {
+						values2search.push_back(ins.in2);
+					}
+					result = false;
 				} else {
 					value2 = values[ins.in2];
 				}
@@ -148,7 +145,10 @@ bool ProcessInstruction(INSTRUCTION ins, std::map<std::string, int> &values) {
 		case OP_ASSIGN:
 			if (!ins.in1.empty()) {
 				if (values.find(ins.in1) == values.end()) {
-					return false;
+					if (std::find(values2search.begin(), values2search.end(), ins.in1) == values2search.end()) {
+						values2search.push_back(ins.in1);
+					}
+					result = false;
 				} else {
 					value1 = values[ins.in1];
 				}
@@ -156,6 +156,10 @@ bool ProcessInstruction(INSTRUCTION ins, std::map<std::string, int> &values) {
 				value1 = ins.in1val;
 			}
 			break;
+	}
+
+	if (!result) {
+		return false;
 	}
 
 	switch (ins.operation) {
@@ -189,48 +193,57 @@ bool ProcessInstruction(INSTRUCTION ins, std::map<std::string, int> &values) {
 
 int ProcessInstructions(std::map<std::string, INSTRUCTION> data, std::string request) {
 	std::map<std::string, int> values;
-	std::map<std::string, INSTRUCTION> ins;
-	std::vector<std::string> index;
+	std::map<std::string, INSTRUCTION> ins(data), new_ins;
+	std::vector<std::string> index, new_index;
 	std::map<std::string, INSTRUCTION>::iterator it;
+	std::vector<std::string>::iterator itv;
 
 	index.clear();
 	index.push_back(request);
 	values.clear();
-	ins.clear();
 
-	// while ((index.size() > 0) || (ins.size() > 0)) {
 	while (values.find(request) == values.end()) {
-		if (!index.empty()) {
-			std::string variable;
-			variable = index.back();
-			index.pop_back();
-			it = data.find(variable);
-			if (it == data.end()) {
-				int z = 999; // problem
-			} else {
-				if (!ProcessInstruction(it->second, values)) {
-					ins[variable] = it->second;
-					if (!it->second.in1.empty()) {
-						index.push_back(it->second.in1);
-					}
-					if (!it->second.in2.empty()) {
-						index.push_back(it->second.in2);
-					}
+		new_index.clear();
+		for (itv = index.begin(); itv != index.end(); ++itv) {
+			it = ins.find(*itv);
+			if (it != ins.end()) {
+				if (!ProcessInstruction(it->second, values, new_index)) {
+					new_index.push_back(it->first);
 				} else {
+					ins.erase(it);
+				}
+			} else {
+				int z = 11; // problem!!!
+			}
+		}
+		index = new_index;
+
+		new_ins.clear();
+		for (it = ins.begin(); it != ins.end(); ++it) {
+			itv = std::find(index.begin(), index.end(), it->first);
+			if (!ProcessInstruction(it->second, values, index)) {
+				new_ins[it->first] = it->second;
+				if (itv == index.end()) {
+					index.push_back(it->first);
+				}
+			} else {
+				if (itv != index.end()) {
+					index.erase(itv);
 				}
 			}
 		}
+		ins = new_ins;
 	}
-	//}
 
 	return values[request];
 }
 
 int main(void) {
-	int result1 = 0, result2 = 0, cnt, pos;
+	int result1 = 0, result2 = 0, cnt;
 	std::ifstream input;
 	std::string line;
 	std::map<std::string, INSTRUCTION> instructions;
+	INSTRUCTION part2modification;
 
 	std::cout << "=== Advent of Code - day 7 ====" << std::endl;
 	std::cout << "--- part 1 ---" << std::endl;
@@ -249,128 +262,10 @@ int main(void) {
 		INSTRUCTION inst;
 		std::string left;
 
-		// decode instruction sides
-		pos = line.find(sides_divider);
-		if (pos == std::string::npos) {
-			std::cout << "Instruction invalid format at input line " << cnt
-					  << std::endl;
-			return -1;
-		}
-		// parse instruction type
 		if (!DecodeInstruction(line, inst)) {
 			std::cout << "Instruction invalid format at input line " << cnt << std::endl;
 			return -1;
 		}
-		/*
-		left = line.substr(0, pos);
-		inst.out = line.substr(pos + sides_divider.size());
-		inst.in1val = 0;
-		inst.in2val = 0;
-		inst.in1.clear();
-		inst.in2.clear();
-		pos = left.find(op_and);
-		if (pos != std::string::npos) {
-			inst.operation = OPERATION::OP_AND;
-			inst.in1 = left.substr(0, pos);
-			inst.in2 = left.substr(pos + op_and.size());
-			if (IsNumeric(inst.in1)) {
-				inst.in1val = atoi(inst.in1.c_str());
-				inst.in1.clear();
-			}
-			if (IsNumeric(inst.in2)) {
-				inst.in2val = atoi(inst.in2.c_str());
-				inst.in2.clear();
-			}
-		} else {
-			pos = left.find(op_or);
-			if (pos != s td::string::npos) {
-				inst.operation = OPERATION::OP_OR;
-				inst.in1 = left.substr(0, pos);
-				inst.in2 = left.substr(pos + op_or.size());
-				if (IsNumeric(inst.in1)) {
-					inst.in1val = atoi(inst.in1.c_str());
-					inst.in1.clear();
-				}
-				if (IsNumeric(inst.in2)) {
-					inst.in2val = atoi(inst.in2.c_str());
-					inst.in2.clear();
-				}
-			} else {
-				pos = left.find(op_not);
-				if (pos != std::string::npos) {
-					inst.operation = OPERATION::OP_NOT;
-					if (pos != 0) {
-						std::cout
-							<< "Invalid NOT operation format in instruction at "
-							   "input line "
-							<< cnt << std::endl;
-						return -1;
-					}
-					inst.in1 = left.substr(op_not.size());
-					inst.in2.clear();
-					if (IsNumeric(inst.in1)) {
-						inst.in1val = atoi(inst.in1.c_str());
-						inst.in1.clear();
-					}
-				} else {
-					pos = left.find(op_lshift);
-					if (pos != std::string::npos) {
-						inst.operation = OPERATION::OP_LSHIFT;
-						inst.in1 = left.substr(0, pos);
-						inst.in2 = left.substr(pos + op_lshift.size());
-						if (IsNumeric(inst.in1)) {
-							inst.in1val = atoi(inst.in1.c_str());
-							inst.in1.clear();
-						}
-						if (!IsNumeric(inst.in2)) {
-							std::cout << "Invalid LSHIFT operation format in "
-										 "instruction at "
-										 "input line "
-									  << cnt << std::endl;
-							return -1;
-						} else {
-							inst.in2val = atoi(inst.in2.c_str());
-							inst.in2.clear();
-						}
-					} else {
-						pos = left.find(op_rshift);
-						if (pos != std::string::npos) {
-							inst.operation = OPERATION::OP_RSHIFT;
-							inst.in1 = left.substr(0, pos);
-							inst.in2 = left.substr(pos + op_rshift.size());
-							if (IsNumeric(inst.in1)) {
-								inst.in1val = atoi(inst.in1.c_str());
-								inst.in1.clear();
-							}
-							if (!IsNumeric(inst.in2)) {
-								std::cout
-									<< "Invalid RSHIFT operation format in "
-									   "instruction at "
-									   "input line "
-									<< cnt << std::endl;
-								return -1;
-							} else {
-								inst.in2val = atoi(inst.in2.c_str());
-								inst.in2.clear();
-							}
-						} else if (left.size() > 0) {
-							inst.operation = OPERATION::OP_ASSIGN;
-							inst.in1 = left;
-							inst.in2.clear();
-							if (IsNumeric(inst.in1)) {
-								inst.in1val = atoi(inst.in1.c_str());
-								inst.in1.clear();
-							}
-						} else {
-							std::cout << "Invalid operation in instruction at "
-										 "input line "
-									  << cnt << std::endl;
-							return -1;
-						}
-					}
-				}
-			}
-		}*/
 		instructions[inst.out] = inst;
 	}
 
@@ -381,5 +276,15 @@ int main(void) {
 	result1 = ProcessInstructions(instructions, "a");
 	std::cout << "Result is " << result1 << std::endl;
 	std::cout << "--- part 2 ---" << std::endl;
+
+	part2modification.operation = OP_ASSIGN;
+	part2modification.in1.clear();
+	part2modification.in2.clear();
+	part2modification.out = "b";
+	part2modification.in1val = result1;
+	part2modification.in2val = 0;
+	instructions[part2modification.out] = part2modification;
+	result2 = ProcessInstructions(instructions, "a");
+
 	std::cout << "Result is " << result2 << std::endl;
 }
