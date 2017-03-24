@@ -5,6 +5,7 @@
 #include <map>
 #include <regex>
 #include <string>
+#include <vector>
 
 bool IsValidRouteInfo(std::string line, std::string &from, std::string &to, int &distance) {
 	std::regex regex_route("^(\\w+) to (\\w+) = (\\d+)$");
@@ -19,10 +20,23 @@ bool IsValidRouteInfo(std::string line, std::string &from, std::string &to, int 
 	return false;
 }
 
-void ExploreRoutes(std::map<std::map<std::string, int>>, std::vector<string>, int current_route, int &result1, int &result2) {
+void ExploreRoutes(std::map<std::string, std::map<std::string, int>> map, std::vector<std::string> sites, std::string last_site, int current_route, int &result1, int &result2) {
 	if (sites.size()) {
-		std::vector<std::string> new_sites(sites);
-
+		for (int i = 0; i < sites.size(); i++) {
+			std::vector<std::string> new_sites;
+			for (int j = 0; j < sites.size(); j++) {
+				if (i != j) {
+					new_sites.push_back(sites[j]);
+				}
+			}
+			if (map.find(last_site) != map.end()) {
+				if (map[last_site].find(sites[i]) != map[last_site].end()) {
+					ExploreRoutes(map, new_sites, sites[i], current_route + map[last_site][sites[i]], result1, result2);
+				}
+			} else if (last_site.empty()) {
+				ExploreRoutes(map, new_sites, sites[i], current_route, result1, result2);
+			}
+		}
 	} else {
 		if (current_route < result1) {
 			result1 = current_route;
@@ -31,7 +45,6 @@ void ExploreRoutes(std::map<std::map<std::string, int>>, std::vector<string>, in
 			result2 = current_route;
 		}
 	}
-	std::vector<std::string> new_sites;
 }
 
 int main(void) {
@@ -75,6 +88,10 @@ int main(void) {
 	if (input.is_open()) {
 		input.close();
 	}
+
+	result1 = INT_MAX;
+
+	ExploreRoutes(map, sites, "", 0, result1, result2);
 
 	std::cout << "Result is " << result1 << std::endl;
 	std::cout << "--- part 2 ---" << std::endl;
