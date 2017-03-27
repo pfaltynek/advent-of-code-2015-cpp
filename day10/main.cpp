@@ -11,7 +11,7 @@ int main(void) {
 	std::string buffer;
 	std::stringstream is, os;
 
-	std::cout << "=== Advent of Code - day 8 ====" << std::endl;
+	std::cout << "=== Advent of Code - day 10 ====" << std::endl;
 	std::cout << "--- part 1 ---" << std::endl;
 
 	cnt = 0;

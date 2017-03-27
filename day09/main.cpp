@@ -54,7 +54,7 @@ int main(void) {
 	std::map<std::string, std::map<std::string, int>> map;
 	std::vector<std::string> sites;
 
-	std::cout << "=== Advent of Code - day 8 ====" << std::endl;
+	std::cout << "=== Advent of Code - day 9 ====" << std::endl;
 	std::cout << "--- part 1 ---" << std::endl;
 
 	input.open("input.txt", std::ifstream::in);

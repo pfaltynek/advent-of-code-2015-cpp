@@ -47,7 +47,7 @@ void IncrementPassword(std::string &password) {
 int main(void) {
 	std::string result1, result2;
 
-	std::cout << "=== Advent of Code - day 8 ====" << std::endl;
+	std::cout << "=== Advent of Code - day 11 ====" << std::endl;
 	std::cout << "--- part 1 ---" << std::endl;
 
 	result1 = input;
