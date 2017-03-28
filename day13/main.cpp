@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -27,6 +28,7 @@ int main(void) {
 	int units, result1, result2, cnt;
 	std::ifstream ifs;
 	std::map<std::string, std::map<std::string, int>> map;
+	std::vector<std::string> items;
 
 	std::cout << "=== Advent of Code - day 13 ====" << std::endl;
 	std::cout << "--- part 1 ---" << std::endl;
@@ -49,6 +51,19 @@ int main(void) {
 			return -1;
 		}
 	}
+
+	/* hint:
+  int myints[] = {1,2,3};
+
+  std::sort (myints,myints+3);
+
+  std::cout << "The 3! possible permutations with 3 elements:\n";
+  do {
+    std::cout << myints[0] << ' ' << myints[1] << ' ' << myints[2] << '\n';
+  } while ( std::next_permutation(myints,myints+3) );
+
+  std::cout << "After loop: " << myints[0] << ' ' << myints[1] << ' ' << myints[2] << '\n';
+  */
 
 	if (ifs.is_open()) {
 		ifs.close();
