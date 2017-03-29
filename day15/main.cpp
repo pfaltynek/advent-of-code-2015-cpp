@@ -1,13 +1,14 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
-#include <vector>
 #include <regex>
 #include <string>
+#include <vector>
 
 std::regex regex_rule("^(\\w+): capacity (-?\\d+), durability (-?\\d+), flavor (-?\\d+), texture (-?\\d+), calories (-?\\d+)$");
 
 const int TEASPOONS_MAX = 100;
+const int CALORIES = 500;
 
 typedef struct {
 	std::string name;
@@ -30,10 +31,14 @@ bool DecodeIngredience(std::string line, INGREDIENCE &ingredience) {
 	return true;
 }
 
-
+void GetRecipeScore(std::vector<INGREDIENCE> ingrediences, std::vector<int> recipe, int &score, int &calories) {
+}
+void ExploreAllRecipes(std::vector<INGREDIENCE> ingrediences, int &result1, int &result2) {
+}
 
 int main(void) {
-	int units, result1, result2, cnt;
+	long result1, result2;
+	int cnt;
 	std::ifstream ifs;
 	std::vector<INGREDIENCE> ingrediences;
 	std::string line;
