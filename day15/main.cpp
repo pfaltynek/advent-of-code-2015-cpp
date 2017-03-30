@@ -31,9 +31,53 @@ bool DecodeIngredience(std::string line, INGREDIENCE &ingredience) {
 	return true;
 }
 
-void GetRecipeScore(std::vector<INGREDIENCE> ingrediences, std::vector<int> recipe, int &score, int &calories) {
+void GetRecipeScore(std::vector<INGREDIENCE> ingrediences, std::vector<int> recipe, long &score, int &calories) {
+	long cap = 0, dur = 0, fla = 0, tex = 0, cal = 0;
+
+	for (int i = 0; i < recipe.size(); i++) {
+		cap += ingrediences[i].capacity * recipe[i];
+		dur += ingrediences[i].durability * recipe[i];
+		fla += ingrediences[i].flavor * recipe[i];
+		tex += ingrediences[i].texture * recipe[i];
+		cal += ingrediences[i].calories * recipe[i];
+	}
+	if ((cap < 0) || (dur < 0) || (fla < 0) || (tex < 0)) {
+		score = 0;
+	} else {
+		score = cap * dur * fla * tex;
+	}
+	calories = cal;
 }
-void ExploreAllRecipes(std::vector<INGREDIENCE> ingrediences, int &result1, int &result2) {
+
+void FindAllAvailableRecipes(std::vector<int> &recipe, int sum, int idx, std::vector<std::vector<int>> &recipes) {
+	if ((idx + 1) == recipe.size()) {
+		recipe[idx] = TEASPOONS_MAX - sum;
+		recipes.push_back(recipe);
+	} else {
+		for (int j = 0; j < TEASPOONS_MAX - sum; j++) {
+			recipe[idx] = j;
+			FindAllAvailableRecipes(recipe, sum + j, idx + 1, recipes);
+		}
+	}
+}
+
+void ExploreAllRecipes(std::vector<INGREDIENCE> ingrediences, long &result1, long &result2) {
+	std::vector<int> recipe(ingrediences.size(), 0);
+	std::vector<std::vector<int>> recipes;
+	long score;
+	int calories;
+
+	FindAllAvailableRecipes(recipe, 0, 0, recipes);
+
+	for (int i = 0; i < recipes.size(); i++) {
+		GetRecipeScore(ingrediences, recipes[i], score, calories);
+		if (score > result1) {
+			result1 = score;
+		}
+		if ((calories == CALORIES) && (score > result2)) {
+			result2 = score;
+		}
+	}
 }
 
 int main(void) {
@@ -69,6 +113,8 @@ int main(void) {
 	if (ifs.is_open()) {
 		ifs.close();
 	}
+
+	ExploreAllRecipes(ingrediences, result1, result2);
 
 	std::cout << "Result is " << result1 << std::endl;
 	std::cout << "--- part 2 ---" << std::endl;
