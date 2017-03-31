@@ -1,52 +1,71 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
+#include <map>
 #include <regex>
 #include <string>
-#include <vector>
-//Sue 1: cars: 9, akitas: 3, goldfish: 0
-std::regex regex_rule("^Sue (//d+): (//w+): (//d+), (//w+): (//d+), (//w+): (//d+)$");
 
-const int TEASPOONS_MAX = 100;
-const int CALORIES = 500;
+std::regex regex_rule("^Sue (\\d+): (\\w+): (\\d+), (\\w+): (\\d+), (\\w+): (\\d+)$"); //Sue 1: cars: 9, akitas: 3, goldfish: 0
 
-typedef struct {
-	std::string name;
-	int capacity, durability, flavor, texture, calories;
-} INGREDIENCE;
-
-bool DecodeIngredience(std::string line, INGREDIENCE &ingredience) {
+bool DecodeAuntSue(std::string line, std::map<std::string, int> &desc, int &aunt_idx) {
 	std::smatch sm;
+
+	desc.clear();
 
 	if (!regex_match(line, sm, regex_rule)) {
 		return false;
 	}
-	ingredience.name = sm.str(1);
-	ingredience.capacity = atoi(sm.str(2).c_str());
-	ingredience.durability = atoi(sm.str(3).c_str());
-	ingredience.flavor = atoi(sm.str(4).c_str());
-	ingredience.texture = atoi(sm.str(5).c_str());
-	ingredience.calories = atoi(sm.str(6).c_str());
+
+	aunt_idx = atoi(sm.str(1).c_str());
+	desc[sm.str(2)] = atoi(sm.str(3).c_str());
+	desc[sm.str(4)] = atoi(sm.str(5).c_str());
+	desc[sm.str(6)] = atoi(sm.str(7).c_str());
 
 	return true;
 }
 
-void GetRecipeScore(std::vector<INGREDIENCE> ingrediences, std::vector<int> recipe, int &score, int &calories) {
+bool CheckAuntPart1(std::map<std::string, int> sue, std::map<std::string, int> check) {
+
+	for (std::map<std::string, int>::iterator it = check.begin(); it != check.end(); ++it) {
+		if (sue[it->first] != it->second) {
+			return false;
+		}
+	}
+	return true;
 }
-void ExploreAllRecipes(std::vector<INGREDIENCE> ingrediences, int &result1, int &result2) {
+
+bool CheckAuntPart2(std::map<std::string, int> sue, std::map<std::string, int> check) {
+
+	for (std::map<std::string, int>::iterator it = check.begin(); it != check.end(); ++it) {
+		if ((it->first == "cats") || (it->first == "trees")) {
+			if (sue[it->first] >= it->second) {
+				return false;
+			}
+		} else if ((it->first == "pomeranians") || (it->first == "goldfish")) {
+			if (sue[it->first] <= it->second) {
+				return false;
+			}
+		} else {
+			if (sue[it->first] != it->second) {
+				return false;
+			}
+		}
+	}
+	return true;
 }
 
 int main(void) {
-	long result1, result2;
-	int cnt;
+	int result1, result2, cnt, idx;
 	std::ifstream ifs;
-	std::vector<INGREDIENCE> ingrediences;
+	std::map<std::string, int> aunt;
+	std::map<int, std::map<std::string, int>> aunts;
 	std::string line;
 
 	std::cout << "=== Advent of Code - day 16 ====" << std::endl;
 	std::cout << "--- part 1 ---" << std::endl;
 
-	result2 = result1 = cnt = 0;
+	result2 = result1 = -1;
+	cnt = 0;
 
 	ifs.open("input.txt", std::ifstream::in);
 
@@ -57,9 +76,9 @@ int main(void) {
 
 	while (std::getline(ifs, line)) {
 		cnt++;
-		INGREDIENCE ingredience;
-		if (DecodeIngredience(line, ingredience)) {
-			ingrediences.push_back(ingredience);
+
+		if (DecodeAuntSue(line, aunt, idx)) {
+			aunts[idx] = aunt;
 		} else {
 			std::cout << "Error decoding input line " << cnt << std::endl;
 			return -1;
@@ -68,6 +87,31 @@ int main(void) {
 
 	if (ifs.is_open()) {
 		ifs.close();
+	}
+
+	aunt.clear();
+	aunt["children"] = 3;
+	aunt["cats"] = 7;
+	aunt["samoyeds"] = 2;
+	aunt["pomeranians"] = 3;
+	aunt["akitas"] = 0;
+	aunt["vizslas"] = 0;
+	aunt["goldfish"] = 5;
+	aunt["trees"] = 3;
+	aunt["cars"] = 2;
+	aunt["perfumes"] = 1;
+
+	for (std::map<int, std::map<std::string, int>>::iterator it = aunts.begin(); it != aunts.end(); ++it) {
+		if (result1 < 0) {
+			if (CheckAuntPart1(aunt, it->second)) {
+				result1 = it->first;
+			}
+		}
+		if (result2 < 0) {
+			if (CheckAuntPart2(aunt, it->second)) {
+				result2 = it->first;
+			}
+		}
 	}
 
 	std::cout << "Result is " << result1 << std::endl;
