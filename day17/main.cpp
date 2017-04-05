@@ -20,25 +20,18 @@ bool DecodeContainerSize(std::string line, int &value) {
 	return true;
 }
 
-void ArrangeEggnog(std::vector<int> containers, std::vector<int> used_cont_idxs, int sum, int &combinations, int &min_value, int &min_count) {
-	for (std::vector<int>::iterator it = free_cont.begin(); it != free_cont.end(); ++it) {
-		int new_sum = sum + *it;
-
+void ArrangeEggnog(const std::vector<int> &containers, int sum, int used_cont_cnt, int int_idx, int &combinations_cnt, int &min_comb_size, int &min_comb_cnt) {
+	for (int i = int_idx; i < containers.size(); i++) {
+		int new_sum = sum + containers[i];
 		if (new_sum < EGGNOG_AMOUNT) {
-			std::vector<int> new_used_cont(used_cont);
-			std::vector<int> new_free_cont(free_cont);
-
-			new_used_cont.push_back(*it);
-			free_cont.erase(it);
-			free_cont.swap(new_free_cont);
-			ArrangeEggnog(new_used_cont, new_free_cont, new_sum, combinations, min_value, min_count);
+			ArrangeEggnog(containers, new_sum, used_cont_cnt + 1, i + 1, combinations_cnt, min_comb_size, min_comb_cnt);
 		} else if (new_sum == EGGNOG_AMOUNT) {
-			combinations++;
-			if (used_cont.size() + 1 < min_value) {
-				min_value = used_cont.size() + 1;
-				min_count = 1;
-			} else if (used_cont.size() + 1 == min_value) {
-				min_count++;
+			combinations_cnt++;
+			if (used_cont_cnt + 1 < min_comb_size) {
+				min_comb_size = used_cont_cnt + 1;
+				min_comb_cnt = 1;
+			} else if (used_cont_cnt + 1 == min_comb_size) {
+				min_comb_cnt++;
 			}
 		}
 	}
@@ -82,7 +75,8 @@ int main(void) {
 
 	cnt = containers.size() + 1;
 	used_cont.clear();
-	ArrangeEggnog(containers, used_cont, 0, result1, cnt, result2);
+
+	ArrangeEggnog(containers, 0, 0, 0, result1, cnt, result2);
 
 	std::cout << "Result is " << result1 << std::endl;
 	std::cout << "--- part 2 ---" << std::endl;
