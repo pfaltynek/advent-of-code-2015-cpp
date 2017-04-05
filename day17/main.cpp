@@ -43,7 +43,7 @@ int main(void) {
 	std::vector<int> containers, used_cont;
 	std::string line;
 
-	std::cout << "=== Advent of Code - day 16 ====" << std::endl;
+	std::cout << "=== Advent of Code - day 17 ====" << std::endl;
 	std::cout << "--- part 1 ---" << std::endl;
 
 	result2 = result1 = cnt = 0;
