@@ -41,27 +41,26 @@ int SolvePart1(std::string molecule, std::map<std::string, std::vector<std::stri
 	return distinct.size();
 }
 
-void SolvePart2(std::string &molecule, int steps, std::map<std::string, std::string> &replacements, int &result) {
-	steps++;
+// Idea from https://github.com/seishun/advent-of-code/blob/master/Day%2019/day19.cpp
+int SolvePart2(std::string molecule, std::map<std::string, std::string> replacements) {
+	int steps = 0;
 
-	if (molecule == "e") {
-		if (steps < result) {
-			result = steps;
+	while (molecule != "e") {
+		decltype(replacements)::iterator best_it;
+		int best_pos = 0, pos;
+
+		for (auto it = replacements.begin(); it != replacements.end(); ++it) {
+			pos = molecule.rfind(it->first);
+			if ((pos != std::string::npos) && (pos >= best_pos)) {
+				best_pos = pos;
+				best_it = it;
+			}
 		}
-		return;
-	} else if (steps >= result) {
-		return;
+		molecule.replace(best_pos, best_it->first.size(), best_it->second);
+		steps++;
 	}
-	for (std::map<std::string, std::string>::iterator it = replacements.begin(); it != replacements.end(); ++it) {
-		size_t pos = 0;
-		pos = molecule.find(it->first, pos);
-		while (pos != std::string::npos) {
-			molecule.replace(pos, it->first.size(), it->second);
-			SolvePart2(molecule, steps, replacements, result);
-			molecule.replace(pos, it->second.size(), it->first);
-			pos = molecule.find(it->first, pos + 1);
-		}
-	}
+
+	return steps;
 }
 
 int main(void) {
@@ -122,7 +121,7 @@ int main(void) {
 	std::cout << "Result is " << result1 << std::endl;
 	std::cout << "--- part 2 ---" << std::endl;
 
-	SolvePart2(molecule, 0, rev_map, result2);
-
+	result2 = SolvePart2(molecule, rev_map);
+	
 	std::cout << "Result is " << result2 << std::endl;
 }
