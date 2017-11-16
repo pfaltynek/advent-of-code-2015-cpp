@@ -5,6 +5,7 @@
 #include <regex>
 #include <string>
 #include <vector>
+#include <climits>
 
 std::regex regex_rule("^([a-zA-Z]+) => ([a-zA-Z]+)$");
 

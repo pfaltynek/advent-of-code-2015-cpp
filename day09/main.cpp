@@ -6,6 +6,7 @@
 #include <regex>
 #include <string>
 #include <vector>
+#include <climits>
 
 bool IsValidRouteInfo(std::string line, std::string &from, std::string &to, int &distance) {
 	std::regex regex_route("^(\\w+) to (\\w+) = (\\d+)$");

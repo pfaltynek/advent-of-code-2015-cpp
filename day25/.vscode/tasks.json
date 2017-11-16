@@ -1,31 +1,32 @@
 {
-	"version": "0.1.0",
-	"command": "Build",
-	"args": [
-		"${fileBasename}"
-	],
-	"isShellCommand": true,
+	// See https://go.microsoft.com/fwlink/?LinkId=733558
+	// for the documentation about the tasks.json format
+	"version": "2.0.0",
 	"tasks": [
 		{
-			"taskName": "Build",
-			"isBuildCommand": true,
-			"showOutput": "always",
+			"label": "build AoC 2015 day 25",
+			"type": "shell",
+			"command": "g++",
 			"args": [
-				"all"
+				"-g", "main.cpp", "-o", "aoc-2015-day25"
 			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
 			"problemMatcher": {
 				"owner": "cpp",
-				"severity": "info", // treat note as info
-				"fileLocation": "absolute",
+				"fileLocation": ["relative", "${workspaceFolder}"],
 				"pattern": {
-					"regexp": "^(.*)\\((\\d+)\\):\\s+(warning|error|note)\\s*(\\w+)?:\\s+(.*)$",
+					"regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
 					"file": 1,
-					"location": 2,
-					"severity": 3,
-					"code": 4,
+					"line": 2,
+					"column": 3,
+					"severity": 4,
 					"message": 5
 				}
 			}
+
 		}
 	]
 }

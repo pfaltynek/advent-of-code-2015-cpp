@@ -5,6 +5,7 @@
 #include <regex>
 #include <string>
 #include <vector>
+#include <climits>
 
 const std::string str_hit_pts = "Hit Points";
 const std::string str_damage = "Damage";
